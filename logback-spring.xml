@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="oas.app.log.path" source="oas.app.log.path" />
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>osdu_common_service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${oas.app.log.path}/osdu_common_service-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>200MB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%highlight(%level)|%d{dd-MM-yyyy HH:mm:ss.SSS}|%t|%logger{0}.%M.%L|%mdc|%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+    <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>logPath</key>
+            <defaultValue>${oas.app.log.path}/osdu_common_service.log</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${logPath}" class="ch.qos.logback.core.FileAppender">
+                <file>${logPath}</file>
+                <append>true</append>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS}|%msg%n</pattern>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+
+    <logger name="com.slb" level="info" additivity="false">
+        <appender-ref ref="SIFT" />
+    </logger>
+
+    <root level="debug">
+        <appender-ref ref="ROLLING" />
+    </root>
